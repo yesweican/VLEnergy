@@ -1,0 +1,82 @@
+name: Deploy VX Solution
+
+on:
+  push:
+    branches: ["main"]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ------------------------------
+      # Checkout Repo
+      # ------------------------------
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ------------------------------
+      # Azure Login via OIDC (no secrets!)
+      # ------------------------------
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id:  ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # =======================================================
+      # 1️⃣ Build .NET Web App
+      # =======================================================
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore Dependencies (Web App)
+        run: dotnet restore ./webapp/VXWebApp.csproj
+
+      - name: Build Web App
+        run: dotnet build --configuration Release ./webapp/VXWebApp.csproj
+
+      - name: Publish Web App
+        run: dotnet publish ./webapp/VXWebApp.csproj -c Release -o ./publish/webapp
+
+      # =======================================================
+      # 2️⃣ Deploy .NET Web App to Azure App Service
+      # =======================================================
+      - name: Deploy Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: "vx-webapp"
+          slot-name: "production"
+          package: "./publish/webapp"
+
+      # =======================================================
+      # 3️⃣ Prepare Python Azure Functions
+      # =======================================================
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      # Function #1
+      - name: Install Function1 dependencies
+        run: |
+          cd functions/datainjection
+          pip install -r requirements.txt --target "./.python_packages/lib/site-packages"
+
+      # =======================================================
+      # 4️⃣ Deploy Azure Functions
+      # =======================================================
+      - name: Deploy Function1
+        uses: Azure/functions-action@v1
+        with:
+          app-name: "datainjectfunc-app"
+          package: "functions/datainjection"
+
+

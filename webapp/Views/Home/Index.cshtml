@@ -1,0 +1,27 @@
+@model List<VXWebApp.Models.RawData>
+
+<h2>Raw Data</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Client</th>
+            <th>Device</th>
+            <th>Reading</th>
+            <th>Unit</th>
+            <th>Timestamp</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Client_ID</td>
+                <td>@item.Device_ID</td>
+                <td>@item.Device_Reading</td>
+                <td>@item.Reading_Unit</td>
+                <td>@item.TimeStamp.ToString("yyyy-MM-dd HH:mm:ss")</td>
+            </tr>
+        }
+    </tbody>
+</table>

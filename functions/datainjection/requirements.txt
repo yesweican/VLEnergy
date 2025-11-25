@@ -4,3 +4,4 @@ azure-keyvault-secrets
 pyodbc
 pydantic
 python-dotenv
+pandas

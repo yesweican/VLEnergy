@@ -46,3 +46,16 @@ az webapp identity show \
   --resource-group vx-rg \
   --query principalId \
   -o tsv
+
+# Use above Identities to access KeyVault
+az keyvault set-policy \
+  --name vx-keyvault \
+  --object-id <FUNCTION_APP_OBJECT_ID> \
+  --secret-permissions get list
+
+az keyvault set-policy \
+  --name vx-keyvault \
+  --object-id <WEBAPP_OBJECT_ID> \
+  --secret-permissions get list
+
+

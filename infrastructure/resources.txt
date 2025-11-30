@@ -33,3 +33,16 @@ az functionapp create \
   --runtime-version 3.11 \
   --functions-version 4 \
   --consumption-plan-location canadacentral
+
+# Retrieve Managed Identities
+az functionapp identity show \
+  --name vx-functionapp \
+  --resource-group vx-rg \
+  --query principalId \
+  -o tsv
+
+az webapp identity show \
+  --name vx-webapp \
+  --resource-group vx-rg \
+  --query principalId \
+  -o tsv
